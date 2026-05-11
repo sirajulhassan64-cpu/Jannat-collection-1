@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jannat collection </title>
+
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  background:#eef3ff;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px;
+  background:#1e3c72;
+  color:white;
+}
+
+.logo{font-size:22px;font-weight:bold}
+
+.search-bar input{
+  padding:10px;
+  width:220px;
+  border-radius:20px;
+  border:none;
+}
+
+/* CART */
+.cart{
+  background:red;
+  padding:10px 15px;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+/* PRODUCTS */
+.products{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card img{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+/* BUTTONS */
+button{
+  width:100%;
+  margin-top:5px;
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.shop{background:#1e3c72;color:white}
+.cartbtn{background:#28a745;color:white}
+.wish{background:#ff4d6d;color:white}
+
+/* CART BOX */
+#cartBox{
+  position:fixed;
+  right:10px;
+  top:70px;
+  width:260px;
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  display:none;
+  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* CHECKOUT */
+#checkout{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  display:none;
+  width:300px;
+  box-shadow:0 10px 20px rgba(0,0,0,0.3);
+}
+
+.close{
+  background:red;
+  color:white;
+  padding:5px;
+  border:none;
+  float:right;
+  cursor:pointer;
+}
+
+/* RESPONSIVE */
+@media(max-width:800px){
+  .products{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:500px){
+  .products{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Pro Shop</div>
+
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search...">
+  </div>
+
+  <div class="cart" onclick="toggleCart()">
+    Cart ?? <span id="count">0</span>
+  </div>
+</header>
+
+<div id="cartBox"></div>
+
+<!-- CHECKOUT -->
+<div id="checkout">
+  <button class="close" onclick="closeCheckout()">X</button>
+  <h3>Checkout</h3>
+  <div id="orderList"></div>
+  <h4>Total: $<span id="total">0</span></h4>
+  <button class="shop" onclick="placeOrder()">Place Order</button>
+</div>
+
+<!-- PRODUCTS -->
+<div class="products">
+
+  <div class="card" data-name="Shoes">
+    <img src="https://picsum.photos/300?1">
+    <h3>Shoes - $50</h3>
+    <button class="shop" onclick="buyNow('Shoes',50)">Buy Now</button>
+    <button class="cartbtn" onclick="addCart('Shoes',50)">Add to Cart</button>
+    <button class="wish" onclick="wish('Shoes')">??</button>
+  </div>
+
+  <div class="card" data-name="Watch">
+    <img src="https://picsum.photos/300?2">
+    <h3>Watch - $80</h3>
+    <button class="shop" onclick="buyNow('Watch',80)">Buy Now</button>
+    <button class="cartbtn" onclick="addCart('Watch',80)">Add to Cart</button>
+    <button class="wish" onclick="wish('Watch')">??</button>
+  </div>
+
+</div>
+
+<script>
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+/* SAVE CART */
+function save(){
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+/* ADD CART */
+function addCart(name,price){
+  cart.push({name,price});
+  document.getElementById("count").innerText = cart.length;
+  save();
+  renderCart();
+}
+
+/* WISHLIST */
+function wish(item){
+  alert("?? Added: " + item);
+}
+
+/* BUY NOW */
+function buyNow(name,price){
+  document.getElementById("checkout").style.display="block";
+  document.getElementById("orderList").innerHTML = name + " - $" + price;
+  document.getElementById("total").innerText = price;
+}
+
+/* CART */
+function toggleCart(){
+  let box = document.getElementById("cartBox");
+  box.style.display = box.style.display==="block"?"none":"block";
+  renderCart();
+}
+
+/* RENDER CART */
+function renderCart(){
+  let box = document.getElementById("cartBox");
+  if(cart.length===0){
+    box.innerHTML="Cart Empty";
+    return;
+  }
+
+  let total=0;
+  box.innerHTML="<h3>Cart</h3>";
+
+  cart.forEach((c,i)=>{
+    total += c.price;
+    box.innerHTML += `<p>${i+1}. ${c.name} - $${c.price}</p>`;
+  });
+
+  box.innerHTML += `<hr>Total: $${total}`;
+}
+
+/* CHECKOUT */
+function closeCheckout(){
+  document.getElementById("checkout").style.display="none";
+}
+
+function placeOrder(){
+  alert("?? Order Placed Successfully!");
+  cart = [];
+  save();
+  document.getElementById("count").innerText = 0;
+  closeCheckout();
+}
+
+/* SEARCH */
+document.getElementById("search").addEventListener("input",function(){
+  let val=this.value.toLowerCase();
+  document.querySelectorAll(".card").forEach(c=>{
+    c.style.display = c.getAttribute("data-name").toLowerCase().includes(val)?"block":"none";
+  });
+});
+
+/* INIT */
+document.getElementById("count").innerText = cart.length;
+renderCart();
+
+</script>
+
+</body>
+</html>
